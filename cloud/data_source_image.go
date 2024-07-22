@@ -21,8 +21,8 @@ func dataSourceImage() *schema.Resource {
 					"for public images or private_image_name for private images.",
 			},
 			"datacenter_id": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
 				Description: "id field of datacenter data source",
 			},
 			"os": {
@@ -130,9 +130,9 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, m interfac
 			d.SetId("")
 			d.Set("code", "")
 			d.Set("os", "")
-			return diag.Errorf("could not find matching image, available public images: \n" +
-				"%s\n\n" +
-				"Private images are not listed, see the following link for details: https://github.com/Kamatera/terraform-provider-kamatera/blob/master/README.md#using-a-private-image", getAvailableImages(images))
+			return diag.Errorf("could not find matching image, available public images: \n"+
+				"%s\n\n"+
+				"Private images are not listed, see the following link for details: https://docs.cloud.ims-network.net", getAvailableImages(images))
 		}
 	} else {
 		if code != "" || os != "" {

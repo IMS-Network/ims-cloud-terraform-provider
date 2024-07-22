@@ -22,7 +22,7 @@ Create a `main.tf` file:
 terraform {
   required_providers {
     ims_cloud = {
-      source = "ims-network/ims-cloud"
+      source = "ims-network/cloud"
     }
   }
 }

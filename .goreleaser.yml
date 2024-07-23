@@ -1,56 +1,71 @@
+# Visit https://goreleaser.com for documentation on how to customize this behavior.
+#before:
+#  hooks:
+    # this is just an example and not a requirement for provider building/publishing
+#    - go mod tidy
+
 project_name: terraform-provider-ims-cloud
 version: 2
-release:
-  github:
-    owner: ims-network
-    name: terraform-provider-ims-cloud
 
 builds:
-  - id: terraform-provider-ims-cloud
-    main: .
-    binary: terraform-provider-ims-cloud
+  - env:
+      # goreleaser does not work with CGO, it could also complicate
+      # usage by users in CI/CD systems like Terraform Cloud where
+      # they are unable to install libraries.
+      - CGO_ENABLED=0
+    mod_timestamp: '{{ .CommitTimestamp }}'
+    flags:
+      - -trimpath
+    ldflags:
+      - '-s -w -X main.version={{.Version}} -X main.commit={{.Commit}}'
     goos:
+      - freebsd
+      - windows
       - linux
       - darwin
-      - windows
     goarch:
       - amd64
-    env:
-      - CGO_ENABLED=0
+      - '386'
+      - arm
+      - arm64
+    ignore:
+      - goos: darwin
+        goarch: '386'
+      - goos: windows
+        goarch: arm64
+    binary: '{{ .ProjectName }}_v{{ .Version }}'
 
 archives:
-  - id: archive
-    format: tar.gz
-    builds:
-      - terraform-provider-ims-cloud
-    files:
-      - README.md
+  - format: zip
+    name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
 
 checksum:
-  name_template: 'checksums.txt'
+  name_template: '{{ .ProjectName }}_{{ .Version }}_SHA256SUMS'
   algorithm: sha256
   extra_files:
-    - glob: dist/*.zip
-    - glob: dist/*.tar.gz
+    - glob: 'terraform-registry-manifest.json'
+      name_template: '{{ .ProjectName }}_{{ .Version }}_manifest.json'
 
 signs:
   - artifacts: checksum
     cmd: gpg
     args:
-      - '--batch'
-      - '--pinentry-mode'
-      - loopback
-      - '--sign'
-      - '--detach-sign'
-      - '--armor'
-      - '--output'
-      - '${artifact}.sig'
-      - '${artifact}'
-    env:
-      - GPG_FINGERPRINT
+      - "--batch"
+      - "--local-user"
+      - "{{ .Env.GPG_FINGERPRINT }}" # Ensure this environment variable is set for your signing key
+      - "--output"
+      - "${signature}"
+      - "--detach-sign"
+      - "${artifact}"
 
-snapshot:
-  name_template: "{{ .Tag }}-next"
+release:
+  github:
+    owner: ims-network
+    name: terraform-provider-ims-cloud
+  extra_files:
+    - glob: 'terraform-registry-manifest.json'
+      name_template: '{{ .ProjectName }}_{{ .Version }}_manifest.json'
+  # If you want to manually examine the release before it's live, uncomment this line:
+  # draft: true
 
-changelog:
-  use: github
+changelog: {}

@@ -35,10 +35,17 @@ checksum:
 
 signs:
   - artifacts: checksum
+    cmd: gpg
     args:
       - '--batch'
       - '--pinentry-mode'
       - loopback
+      - '--sign'
+      - '--detach-sign'
+      - '--armor'
+      - '--output'
+      - '${artifact}.sig'
+      - '${artifact}'
     env:
       - GPG_FINGERPRINT
 

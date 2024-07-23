@@ -1,0 +1,39 @@
+project_name: terraform-provider-ims-cloud
+release:
+  github:
+    owner: your-github-username-or-org
+    name: terraform-provider-ims-cloud
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+    main: ./main.go
+    binary: terraform-provider-ims-cloud
+
+archives:
+  - format: tar.gz
+    files:
+      - license
+      - README.md
+
+checksum:
+  name_template: 'checksums.txt'
+  algorithm: sha256
+  extra_files:
+    - glob: dist/*.zip
+    - glob: dist/*.tar.gz
+
+signs:
+  - artifacts: checksum
+    args: 
+      - '--batch'
+      - '--pinentry-mode'
+      - loopback
+    env:
+      - GPG_FINGERPRINT

@@ -1,25 +1,29 @@
 project_name: terraform-provider-ims-cloud
+version: 2
 release:
   github:
-    owner: your-github-username-or-org
+    owner: ims-network
     name: terraform-provider-ims-cloud
 
 builds:
-  - env:
-      - CGO_ENABLED=0
+  - id: terraform-provider-ims-cloud
+    main: .
+    binary: terraform-provider-ims-cloud
     goos:
       - linux
       - darwin
       - windows
     goarch:
       - amd64
-    main: ./main.go
-    binary: terraform-provider-ims-cloud
+    env:
+      - CGO_ENABLED=0
 
 archives:
-  - format: tar.gz
+  - id: archive
+    format: tar.gz
+    builds:
+      - terraform-provider-ims-cloud
     files:
-      - license
       - README.md
 
 checksum:
@@ -31,9 +35,15 @@ checksum:
 
 signs:
   - artifacts: checksum
-    args: 
+    args:
       - '--batch'
       - '--pinentry-mode'
       - loopback
     env:
       - GPG_FINGERPRINT
+
+snapshot:
+  name_template: "{{ .Tag }}-next"
+
+changelog:
+  use: github
